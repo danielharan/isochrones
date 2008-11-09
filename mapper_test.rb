@@ -16,7 +16,15 @@ class TripTest < Test::Unit::TestCase
   def test_load
     assert_equal 11, (trips = Trip.load("sample-feed/trips.txt")).size
     
-    assert_equal 'AB', trips.first.route_id
-    assert_equal 'FULLW', trips.first.service_id
+    t = trips.first
+    assert_equal ['AB', 'FULLW', 'AB1'], [t.route_id, t.service_id, t.trip_id]
+  end
+end
+
+class StopTimeTest < Test::Unit::TestCase
+  def test_load
+    stop_time = StopTime.load("sample-feed/stop_times.txt").first
+    
+    assert_equal 'STBA', stop_time.trip_id
   end
 end

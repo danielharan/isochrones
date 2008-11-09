@@ -40,6 +40,6 @@ class StopTime < FeedObject
   %w{ trip_id arrival_time departure_time stop_id stop_sequence stop_headsign }.each {|attr| attr_accessor attr }
   
   def initialize(args)
-    
+    @trip_id, @arrival_time, @departure_time, @stop_id, @stop_sequence, @stop_headsign, ignored = *args
   end
 end
