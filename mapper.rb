@@ -45,9 +45,7 @@ class FeedObject
 end
 
 class Trip < FeedObject
-  ['route_id','service_id','trip_id','trip_headsign','direction_id','block_id','shape_id'].each do |attr|
-    attr_accessor attr.to_s
-  end
+  attr_accessor 'route_id','service_id','trip_id','trip_headsign','direction_id','block_id','shape_id'
   
   def initialize(args)
     @route_id, @service_id, @trip_id, @trip_headsign, ignored = *args
@@ -55,7 +53,7 @@ class Trip < FeedObject
 end
 
 class StopTime < FeedObject
-  %w{ trip_id arrival_time departure_time stop_id stop_sequence stop_headsign }.each {|attr| attr_accessor attr }
+  attr_accessor 'trip_id', 'arrival_time', 'departure_time', 'stop_id', 'stop_sequence', 'stop_headsign'
   
   def initialize(args)
     @trip_id, @arrival_time, @departure_time, @stop_id, @stop_sequence, @stop_headsign, ignored = *args
