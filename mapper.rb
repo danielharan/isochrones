@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'fastercsv'
+require 'ostruct'
 
 class Mapper
   FEED_DIR = 'sample-feed'
@@ -38,24 +39,14 @@ class Mapper
     end
 end
 
-class FeedObject
+class FeedObject < OpenStruct
   def self.load(path)
-    FasterCSV.read(path).to_a[1..-1].collect {|line| new(line) }
+    FasterCSV.read(path, :headers => true).collect { |line| new(line.to_hash) }
   end
 end
 
 class Trip < FeedObject
-  attr_accessor 'route_id','service_id','trip_id','trip_headsign','direction_id','block_id','shape_id'
-  
-  def initialize(args)
-    @route_id, @service_id, @trip_id, @trip_headsign, ignored = *args
-  end
 end
 
 class StopTime < FeedObject
-  attr_accessor 'trip_id', 'arrival_time', 'departure_time', 'stop_id', 'stop_sequence', 'stop_headsign'
-  
-  def initialize(args)
-    @trip_id, @arrival_time, @departure_time, @stop_id, @stop_sequence, @stop_headsign, ignored = *args
-  end
 end
