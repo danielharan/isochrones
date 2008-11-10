@@ -6,7 +6,7 @@ require 'rubygems'
 class MapperTest < Test::Unit::TestCase
   
   def test_initialize
-    m = Mapper.new
+    m = Mapper.new('sample-feed')
     assert_not_nil m.trips
     assert_not_nil m.stop_times
   end

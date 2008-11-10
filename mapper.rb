@@ -3,21 +3,15 @@ require 'fastercsv'
 require 'ostruct'
 
 class Mapper
-  FEED_DIR = 'sample-feed'
-  
   attr_accessor :trips, :stop_times, :best_times
-  def initialize
-    load_trips
-    load_stop_times
+  def initialize(feed_dir)
+    load_data(feed_dir)
     @best_times = {}
   end
   
-  def load_trips
-    @trips = Trip.load("#{FEED_DIR}/trips.txt")
-  end
-  
-  def load_stop_times
-    @stop_times = FasterCSV.read("#{FEED_DIR}/stop_times.txt").to_a[1..-1]
+  def load_data(feed_dir)
+    @trips      = Trip.load      "#{feed_dir}/trips.txt"
+    @stop_times = StopTime.load  "#{feed_dir}/stop_times.txt"
   end
   
   def isochrone(stop, time)
@@ -45,8 +39,5 @@ class FeedObject < OpenStruct
   end
 end
 
-class Trip < FeedObject
-end
-
-class StopTime < FeedObject
-end
+class Trip     < FeedObject; end
+class StopTime < FeedObject; end
