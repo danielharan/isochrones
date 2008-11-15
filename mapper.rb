@@ -17,6 +17,10 @@ class Mapper
     @stop_times = StopTime.load  "#{feed_dir}/stop_times.txt"
     @stops      = Stop.load      "#{feed_dir}/stops.txt"
   end
+
+  def stop(stop_name)
+    @stops.detect {|stop| stop.stop_id == stop_name}
+  end
   
   def isochrone(stop, time)
     @best_times = {stop => time}
@@ -24,14 +28,15 @@ class Mapper
     while !@stack.empty?
       traverse(@stack.pop, time)
     end
+    @best_times
   end
   
   private
     def traverse(stop,time)
       stop.available_hops.each do |hop|
-        if @best_times[hop.destination_stop] > hop.end_time
-          @best_times[hop.destination_stop] = hop.end_time
-          @stack << hop.destination_stop
+        if @best_times[hop.destination].nil? || @best_times[hop.destination] > hop.arrival_time
+          @best_times[hop.destination] = hop.arrival_time
+          @stack << stop(hop.destination) #ouch, that's inefficient
         end
       end
     end

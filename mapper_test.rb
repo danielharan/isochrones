@@ -14,14 +14,27 @@ class MapperTest < Test::Unit::TestCase
   
   def test_hop_creation
     m = Mapper.new('sample-feed')
-    stagecoach_stop = m.stops.detect {|stop| stop.stop_id == "STAGECOACH"}
-    assert_equal 2, stagecoach_stop.available_hops.length
+    assert_equal 2, m.stop("STAGECOACH").available_hops.length
     
-    stba_hop = stagecoach_stop.available_hops.detect {|hop| hop.trip_id == "STBA"}
+    stba_hop = m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "STBA"}
     assert_equal "BEATTY_AIRPORT", stba_hop.destination
     assert_equal "6:20:00",        stba_hop.arrival_time
     
-    assert_equal "NANAA", stagecoach_stop.available_hops.detect {|hop| hop.trip_id == "CITY1"}.destination
+    assert_equal "NANAA", m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "CITY1"}.destination
+  end
+  
+  def test_isochrone_creation
+    m = Mapper.new('sample-feed')
+    nanaa = m.stop("NANAA")
+    # This is the default trip that Google's demo agency shows...
+    # http://www.google.com/maps?ttype=dep&saddr=North+Ave+at+N+A+Ave+Beatty,+NV&daddr=W+Cottonwood+Dr+at+A+Ave+S+Beatty,+NV&ie=UTF8&f=d&dirflg=r
+    # 6:07am	Depart North Ave / N A Ave (Demo)
+    # 6:26am	Arrive E Main St / S Irving St (Demo)
+    assert_equal "6:26:00", m.isochrone(nanaa, "6:07:00")["EMSI"]
+  end
+  
+  def test_available_hops_are_after_current_time
+    flunk # next TODO :)
   end
 end
 
