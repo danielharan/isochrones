@@ -3,7 +3,7 @@ require 'fastercsv'
 require 'ostruct'
 
 class Mapper
-  attr_accessor :trips, :stop_times, :best_times
+  attr_accessor :trips, :stop_times, :stops, :best_times
   def initialize(feed_dir)
     load_data(feed_dir)
   end
@@ -11,6 +11,7 @@ class Mapper
   def load_data(feed_dir)
     @trips      = Trip.load      "#{feed_dir}/trips.txt"
     @stop_times = StopTime.load  "#{feed_dir}/stop_times.txt"
+    @stops      = Stop.load      "#{feed_dir}/stops.txt"
   end
   
   def isochrone(stop, time)
@@ -40,3 +41,4 @@ end
 
 class Trip     < FeedObject; end
 class StopTime < FeedObject; end
+class Stop     < FeedObject; end

@@ -9,6 +9,7 @@ class MapperTest < Test::Unit::TestCase
     m = Mapper.new('sample-feed')
     assert_not_nil m.trips
     assert_not_nil m.stop_times
+    assert_not_nil m.stops
   end
 end
 
