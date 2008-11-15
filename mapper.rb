@@ -6,7 +6,6 @@ class Mapper
   attr_accessor :trips, :stop_times, :best_times
   def initialize(feed_dir)
     load_data(feed_dir)
-    @best_times = {}
   end
   
   def load_data(feed_dir)
@@ -15,10 +14,10 @@ class Mapper
   end
   
   def isochrone(stop, time)
-    @best_times[stop] = time
+    @best_times = {stop => time}
     @stack = [stop]
     while !@stack.empty?
-      traverse(stop.pop, time)
+      traverse(@stack.pop, time)
     end
   end
   
