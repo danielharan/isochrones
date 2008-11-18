@@ -23,7 +23,7 @@ class Mapper
   end
   
   def isochrone(stop, time)
-    @best_times = {stop => time}
+    @best_times = {stop.stop_id => time}
     @stack = [stop]
     while !@stack.empty?
       traverse(@stack.pop, time)
