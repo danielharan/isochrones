@@ -43,13 +43,20 @@ class Mapper
 end
 
 class FeedObject < OpenStruct
+  DATETIME_MATCHER = lambda {|field, field_info| field_info.header =~ /_time$/ ? (Time.parse(field) rescue field) : field}
   def self.load(path)
-    FasterCSV.read(path, :headers => true).collect { |line| new(line.to_hash) }
+    FasterCSV.read(path, :converters => DATETIME_MATCHER, :headers => true).collect { |line| new(line.to_hash) }
   end
 end
 
 class Trip     < FeedObject; end
-class StopTime < FeedObject; end
+class StopTime < FeedObject;
+  #def initialize(args)
+  #  super
+    #could probably do this with faster_csv, but too lazy to check docs
+  #  self.departure_time = Time.parse(self.departure_time)
+  #end
+end
 
 class Hop < OpenStruct
   def initialize(from,to)

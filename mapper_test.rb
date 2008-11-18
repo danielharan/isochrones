@@ -17,8 +17,8 @@ class MapperTest < Test::Unit::TestCase
     assert_equal 2, m.stop("STAGECOACH").available_hops.length
     
     stba_hop = m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "STBA"}
-    assert_equal "BEATTY_AIRPORT", stba_hop.destination
-    assert_equal "6:20:00",        stba_hop.arrival_time
+    assert_equal "BEATTY_AIRPORT",      stba_hop.destination
+    assert_equal Time.parse("6:20:00"), stba_hop.arrival_time
     
     assert_equal "NANAA", m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "CITY1"}.destination
   end
@@ -30,7 +30,8 @@ class MapperTest < Test::Unit::TestCase
     # http://www.google.com/maps?ttype=dep&saddr=North+Ave+at+N+A+Ave+Beatty,+NV&daddr=W+Cottonwood+Dr+at+A+Ave+S+Beatty,+NV&ie=UTF8&f=d&dirflg=r
     # 6:07am	Depart North Ave / N A Ave (Demo)
     # 6:26am	Arrive E Main St / S Irving St (Demo)
-    assert_equal "6:26:00", m.isochrone(nanaa, "6:07:00")["EMSI"]
+    puts m.isochrone(nanaa, Time.parse("6:07:00")).inspect
+    assert_equal Time.parse("6:26:00"), m.isochrone(nanaa, Time.parse("6:07:00"))["EMSI"]
   end
   
   def test_available_hops_are_after_current_time
@@ -50,8 +51,11 @@ end
 class StopTimeTest < Test::Unit::TestCase
   def test_load
     stop_time = StopTime.load("sample-feed/stop_times.txt").first
+    # STBA,6:00:00,6:00:00,STAGECOACH,1,,,,
     
     assert_equal 'STBA', stop_time.trip_id
+    assert_equal Time.parse('6:00:00'), stop_time.departure_time
+    assert_equal Time.parse('6:00:00'), stop_time.arrival_time
   end
 end
 
