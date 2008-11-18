@@ -17,23 +17,24 @@ class MapperTest < Test::Unit::TestCase
     assert_equal 2, m.stop("STAGECOACH").available_hops.length
     
     stba_hop = m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "STBA"}
-    assert_equal "BEATTY_AIRPORT",      stba_hop.destination
+    assert_equal "BEATTY_AIRPORT",      stba_hop.destination.stop_id
     assert_equal Time.parse("6:20:00"), stba_hop.arrival_time
     
-    assert_equal "NANAA", m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "CITY1"}.destination
+    assert_equal "NANAA", m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "CITY1"}.destination.stop_id
   end
   
   def test_isochrone_creation
     m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 18))
     nanaa = m.stop("NANAA")
+    assert_not_nil nanaa
     # This is the default trip that Google's demo agency shows...
     # http://www.google.com/maps?ttype=dep&saddr=North+Ave+at+N+A+Ave+Beatty,+NV&daddr=W+Cottonwood+Dr+at+A+Ave+S+Beatty,+NV&ie=UTF8&f=d&dirflg=r
     # 6:07am	Depart North Ave / N A Ave (Demo)
     # 6:26am	Arrive E Main St / S Irving St (Demo)
     isochrone = m.isochrone(nanaa, Time.parse("6:07:00"))
-    puts isochrone.inspect
-    assert_equal Time.parse("6:26:00"), isochrone["EMSI"]
-    assert_equal Time.parse("6:07:00"), isochrone["NANAA"], "should not be able to get to departure stop before we left"
+    assert_equal Time.parse("6:26:00"), isochrone[m.stop("EMSI")]
+    assert_equal Time.parse("6:07:00"), isochrone[nanaa], "should not be able to get to departure stop before we left"
+    #puts isochrone.collect {|key,val| [key.stop_id, val]}.sort_by(&:last).inspect
   end
 end
 
@@ -76,15 +77,20 @@ end
 
 class HopTest < Test::Unit::TestCase
   def test_initialize
+    m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 16)) # Sunday
+    beatty     = m.stop("BEATTY_AIRPORT")
+    stagecoach = m.stop("STAGECOACH")
+    
+    # Making our own stop_times so we can ensure arrival and departure times are sane
     from = StopTime.new :stop_sequence => 1, :arrival_time => "6:00:00", :departure_time => "6:01:00",
-                        :stop_id => "STAGECOACH", :trip_id => "STBA"
+                        :stop_id => stagecoach.stop_id, :trip_id => "STBA", :stop => stagecoach
     to   = StopTime.new :stop_sequence => 2, :arrival_time => "6:20:00", :departure_time => "6:21:00",
-                        :stop_id => "BEATTY_AIRPORT", :trip_id => "STBA"
+                        :stop_id => beatty.stop_id, :trip_id => "STBA", :stop => beatty
     hop = Hop.new(from,to)
     assert_equal "6:01:00",        hop.departure_time
     assert_equal "6:20:00",        hop.arrival_time
     assert_equal "STBA",           hop.trip_id
-    assert_equal "BEATTY_AIRPORT", hop.destination
+    assert_equal beatty,           hop.destination
   end
 end
 

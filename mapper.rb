@@ -47,9 +47,9 @@ class Mapper
   end
   
   def isochrone(stop, time)
-    @best_times = {stop.stop_id => time}
+    @best_times = {stop => time}
     @stack = [stop]
-    while !@stack.empty?
+    until @stack.empty?
       traverse(@stack.pop, time)
     end
     @best_times
@@ -60,7 +60,7 @@ class Mapper
       stop.available_hops_after(time).each do |hop|
         if @best_times[hop.destination].nil? || @best_times[hop.destination] > hop.arrival_time
           @best_times[hop.destination] = hop.arrival_time
-          @stack << stop(hop.destination) #ouch, that's inefficient
+          @stack << hop.destination
         end
       end
     end
@@ -86,7 +86,7 @@ end
 class Hop < OpenStruct
   def initialize(from,to)
     super :departure_time => from.departure_time, :arrival_time => to.arrival_time,
-          :trip_id => from.trip_id, :destination => to.stop_id
+          :trip_id => from.trip_id, :destination => to.stop
   end
 end
 
