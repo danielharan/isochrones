@@ -21,11 +21,14 @@ class MapperFactory
     trips                 = trips.select {|t| available_service_ids.include?(t.service_id)}
     available_trip_ids    = trips.map(&:trip_id)
 
+    stops                 = Stop.load      "#{feed_dir}/stops.txt"
+    stops_hash            = stops.inject({}) {|memo, stop| memo[stop.stop_id] = stop; memo }
+
     stop_times            = StopTime.load  "#{feed_dir}/stop_times.txt"
     stop_times            = stop_times.select {|st| available_trip_ids.include?(st.trip_id)}
 
-    stops                 = Stop.load      "#{feed_dir}/stops.txt"
-    
+    stop_times.each {|st| st.stop = stops_hash[st.stop_id]}
+
     # structure the graph data in a way that we can use
     Stop.generate_hops(stops, stop_times)
     Mapper.new(trips, stop_times, stops)
