@@ -3,19 +3,29 @@ require 'fastercsv'
 require 'ostruct'
 require 'active_support'
 
-class Mapper
-  attr_accessor :trips, :stop_times, :stops, :best_times
+class MapperFactory
+  attr_reader :feed_dir
+
   def initialize(feed_dir)
-    load_data(feed_dir)
-    
-    # structure the graph data in a way that we can use
-    Stop.generate_hops(@stops, @stop_times)
+    @feed_dir = feed_dir
   end
   
-  def load_data(feed_dir)
-    @trips      = Trip.load      "#{feed_dir}/trips.txt"
-    @stop_times = StopTime.load  "#{feed_dir}/stop_times.txt"
-    @stops      = Stop.load      "#{feed_dir}/stops.txt"
+  def mapper
+    trips      = Trip.load      "#{feed_dir}/trips.txt"
+    stop_times = StopTime.load  "#{feed_dir}/stop_times.txt"
+    stops      = Stop.load      "#{feed_dir}/stops.txt"
+    
+    # structure the graph data in a way that we can use
+    Stop.generate_hops(stops, stop_times)
+    Mapper.new(trips, stop_times, stops)
+  end
+end
+
+class Mapper
+  attr_accessor :trips, :stop_times, :stops, :best_times
+
+  def initialize(trips, stop_times, stops)
+    @trips, @stop_times, @stops = trips, stop_times, stops
   end
 
   def stop(stop_name)
