@@ -11,9 +11,20 @@ class MapperFactory
   end
   
   def mapper(date)
-    trips      = Trip.load      "#{feed_dir}/trips.txt"
-    stop_times = StopTime.load  "#{feed_dir}/stop_times.txt"
-    stops      = Stop.load      "#{feed_dir}/stops.txt"
+    calendars             = Calendar.load  "#{feed_dir}/calendar.txt"
+
+    # TODO: Treat calendar exceptions somehow
+    calendars             = calendars.select {|c| c.has_service_on?(Calendar::DateWeekdayToDayName[date.wday])}
+    available_service_ids = calendars.map(&:service_id)
+
+    trips                 = Trip.load      "#{feed_dir}/trips.txt"
+    trips                 = trips.select {|t| available_service_ids.include?(t.service_id)}
+    available_trip_ids    = trips.map(&:trip_id)
+
+    stop_times            = StopTime.load  "#{feed_dir}/stop_times.txt"
+    stop_times            = stop_times.select {|st| available_trip_ids.include?(st.trip_id)}
+
+    stops                 = Stop.load      "#{feed_dir}/stops.txt"
     
     # structure the graph data in a way that we can use
     Stop.generate_hops(stops, stop_times)
@@ -61,6 +72,13 @@ end
 
 class Trip     < FeedObject; end
 class StopTime < FeedObject; end
+class Calendar < FeedObject
+  DateWeekdayToDayName = [:sunday, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday]
+
+  def has_service_on?(dayname)
+    self.send(dayname) == "1"
+  end
+end
 
 class Hop < OpenStruct
   def initialize(from,to)

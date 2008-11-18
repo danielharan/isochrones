@@ -59,10 +59,9 @@ end
 
 class StopTest < Test::Unit::TestCase
   def test_available_hops_are_after_current_time
-    m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 18))
+    # Check service on weekend, because not all service is available on weekdays
+    m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 16)) # Sunday
     stop = m.stop("BEATTY_AIRPORT")
-    puts stop.inspect
-    puts stop.available_hops.collect(&:departure_time).inspect
     assert_equal 3, stop.available_hops.length
     assert_equal 3, stop.available_hops_after(Time.parse("7:59:00")).length
     
@@ -86,5 +85,36 @@ class HopTest < Test::Unit::TestCase
     assert_equal "6:20:00",        hop.arrival_time
     assert_equal "STBA",           hop.trip_id
     assert_equal "BEATTY_AIRPORT", hop.destination
+  end
+end
+
+class CalendarTest < Test::Unit::TestCase
+  def setup
+    @calendars = Calendar.load("sample-feed/calendar.txt")
+    @fullw = @calendars.detect {|c| c.service_id == "FULLW"}
+    @we = @calendars.detect {|c| c.service_id == "WE"}
+  end
+  
+  def test_fullw_has_service_on_all_days
+    assert @fullw.has_service_on?(:monday)
+    assert @fullw.has_service_on?(:tuesday)
+    assert @fullw.has_service_on?(:wednesday)
+    assert @fullw.has_service_on?(:thursday)
+    assert @fullw.has_service_on?(:friday)
+    assert @fullw.has_service_on?(:saturday)
+    assert @fullw.has_service_on?(:sunday)
+  end
+
+  def test_we_has_no_service_on_weekdays
+    assert_equal false, @we.has_service_on?(:monday)
+    assert_equal false, @we.has_service_on?(:tuesday)
+    assert_equal false, @we.has_service_on?(:wednesday)
+    assert_equal false, @we.has_service_on?(:thursday)
+    assert_equal false, @we.has_service_on?(:friday)
+  end
+
+  def test_we_has_service_on_weekends
+    assert @we.has_service_on?(:saturday)
+    assert @we.has_service_on?(:sunday)
   end
 end
