@@ -46,17 +46,17 @@ class Mapper
     @stops.detect {|stop| stop.stop_id == stop_name}
   end
   
-  def isochrone(stop, time)
+  def forward_isochrone(stop, time)
     @best_times = {stop => time}
     @stack = [stop]
     until @stack.empty?
-      traverse(@stack.pop, time)
+      traverse_forward(@stack.pop, time)
     end
     @best_times
   end
   
   private
-    def traverse(stop,time)
+    def traverse_forward(stop,time)
       stop.available_hops_after(time).each do |hop|
         if @best_times[hop.destination].nil? || @best_times[hop.destination] > hop.arrival_time
           @best_times[hop.destination] = hop.arrival_time

@@ -23,7 +23,7 @@ class MapperTest < Test::Unit::TestCase
     assert_equal "NANAA", m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "CITY1"}.destination.stop_id
   end
   
-  def test_isochrone_creation
+  def test_forward_isochrone_creation
     m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 18))
     nanaa = m.stop("NANAA")
     assert_not_nil nanaa
@@ -31,7 +31,7 @@ class MapperTest < Test::Unit::TestCase
     # http://www.google.com/maps?ttype=dep&saddr=North+Ave+at+N+A+Ave+Beatty,+NV&daddr=W+Cottonwood+Dr+at+A+Ave+S+Beatty,+NV&ie=UTF8&f=d&dirflg=r
     # 6:07am	Depart North Ave / N A Ave (Demo)
     # 6:26am	Arrive E Main St / S Irving St (Demo)
-    isochrone = m.isochrone(nanaa, Time.parse("6:07:00"))
+    isochrone = m.forward_isochrone(nanaa, Time.parse("6:07:00"))
     assert_equal Time.parse("6:26:00"), isochrone[m.stop("EMSI")]
     assert_equal Time.parse("6:07:00"), isochrone[nanaa], "should not be able to get to departure stop before we left"
     #puts isochrone.collect {|key,val| [key.stop_id, val]}.sort_by(&:last).inspect
