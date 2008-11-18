@@ -10,7 +10,7 @@ class MapperFactory
     @feed_dir = feed_dir
   end
   
-  def mapper
+  def mapper(date)
     trips      = Trip.load      "#{feed_dir}/trips.txt"
     stop_times = StopTime.load  "#{feed_dir}/stop_times.txt"
     stops      = Stop.load      "#{feed_dir}/stops.txt"

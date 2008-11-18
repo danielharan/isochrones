@@ -6,14 +6,14 @@ require 'activesupport'
 class MapperTest < Test::Unit::TestCase
   
   def test_initialize
-    m = MapperFactory.new('sample-feed').mapper
+    m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 18))
     assert_not_nil m.trips
     assert_not_nil m.stop_times
     assert_not_nil m.stops
   end
   
   def test_hop_creation
-    m = MapperFactory.new('sample-feed').mapper
+    m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 18))
     assert_equal 2, m.stop("STAGECOACH").available_hops.length
     
     stba_hop = m.stop("STAGECOACH").available_hops.detect {|hop| hop.trip_id == "STBA"}
@@ -24,7 +24,7 @@ class MapperTest < Test::Unit::TestCase
   end
   
   def test_isochrone_creation
-    m = MapperFactory.new('sample-feed').mapper
+    m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 18))
     nanaa = m.stop("NANAA")
     # This is the default trip that Google's demo agency shows...
     # http://www.google.com/maps?ttype=dep&saddr=North+Ave+at+N+A+Ave+Beatty,+NV&daddr=W+Cottonwood+Dr+at+A+Ave+S+Beatty,+NV&ie=UTF8&f=d&dirflg=r
@@ -59,7 +59,7 @@ end
 
 class StopTest < Test::Unit::TestCase
   def test_available_hops_are_after_current_time
-    m = MapperFactory.new('sample-feed').mapper
+    m = MapperFactory.new('sample-feed').mapper(Date.new(2008, 11, 18))
     stop = m.stop("BEATTY_AIRPORT")
     puts stop.inspect
     puts stop.available_hops.collect(&:departure_time).inspect
