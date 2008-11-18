@@ -30,12 +30,10 @@ class MapperTest < Test::Unit::TestCase
     # http://www.google.com/maps?ttype=dep&saddr=North+Ave+at+N+A+Ave+Beatty,+NV&daddr=W+Cottonwood+Dr+at+A+Ave+S+Beatty,+NV&ie=UTF8&f=d&dirflg=r
     # 6:07am	Depart North Ave / N A Ave (Demo)
     # 6:26am	Arrive E Main St / S Irving St (Demo)
-    puts m.isochrone(nanaa, Time.parse("6:07:00")).inspect
-    assert_equal Time.parse("6:26:00"), m.isochrone(nanaa, Time.parse("6:07:00"))["EMSI"]
-  end
-  
-  def test_available_hops_are_after_current_time
-    flunk # next TODO :)
+    isochrone = m.isochrone(nanaa, Time.parse("6:07:00"))
+    puts isochrone.inspect
+    assert_equal Time.parse("6:26:00"), isochrone["EMSI"]
+    assert_equal Time.parse("6:07:00"), isochrone["NANAA"], "should not be able to get to departure stop before we left"
   end
 end
 
@@ -57,6 +55,24 @@ class StopTimeTest < Test::Unit::TestCase
     assert_equal Time.parse('6:00:00'), stop_time.departure_time
     assert_equal Time.parse('6:00:00'), stop_time.arrival_time
   end
+end
+
+class StopTest < Test::Unit::TestCase
+  def test_available_hops_are_after_current_time
+    m = Mapper.new('sample-feed')
+    stop = m.stop("BEATTY_AIRPORT")
+    puts stop.inspect
+    puts stop.available_hops.collect(&:departure_time).inspect
+    assert_equal 3, stop.available_hops.length
+    assert_equal 3, stop.available_hops_after(Time.parse("7:59:00")).length
+    
+    assert_equal 3, stop.available_hops_after(Time.parse("8:00:00")).length
+    assert_equal 1, stop.available_hops_after(Time.parse("8:01:00")).length
+    
+    assert_equal 1, stop.available_hops_after(Time.parse("13:00:00")).length
+    assert_equal 0, stop.available_hops_after(Time.parse("13:01:00")).length
+    
+  end  
 end
 
 class HopTest < Test::Unit::TestCase

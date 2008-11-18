@@ -33,7 +33,7 @@ class Mapper
   
   private
     def traverse(stop,time)
-      stop.available_hops.each do |hop|
+      stop.available_hops_after(time).each do |hop|
         if @best_times[hop.destination].nil? || @best_times[hop.destination] > hop.arrival_time
           @best_times[hop.destination] = hop.arrival_time
           @stack << stop(hop.destination) #ouch, that's inefficient
@@ -50,13 +50,7 @@ class FeedObject < OpenStruct
 end
 
 class Trip     < FeedObject; end
-class StopTime < FeedObject;
-  #def initialize(args)
-  #  super
-    #could probably do this with faster_csv, but too lazy to check docs
-  #  self.departure_time = Time.parse(self.departure_time)
-  #end
-end
+class StopTime < FeedObject; end
 
 class Hop < OpenStruct
   def initialize(from,to)
@@ -71,6 +65,10 @@ class Stop     < FeedObject
   def initialize(args)
     super(args)
     @available_hops = []
+  end
+  
+  def available_hops_after(time)
+    @available_hops.select {|hop| hop.departure_time >= time}
   end
   
   def self.generate_hops(stops,stop_times)
